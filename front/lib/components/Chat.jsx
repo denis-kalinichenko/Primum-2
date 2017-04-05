@@ -31,8 +31,7 @@ export default class Chat extends Component {
                     users: json,
                 });
             } else {
-                alert(json.message);
-                // localStorage.removeItem('token');
+                this.logout();
                 this.setState({
                     authError: true,
                 });
@@ -40,12 +39,20 @@ export default class Chat extends Component {
         });
     }
 
+    logout() {
+        this.props.onLogout();
+        this.setState({
+            authError: true,
+        });
+    }
+
     render() {
         return (
             <div>
                 {this.state.authError ? (
-                    <Redirect to="/login" />
+                    <Redirect to="/" />
                 ) : ""}
+                <button type="button" onClick={this.logout}>Logout</button>
                 <div>Chat</div>
                 {
                     this.state.users.map(function(user) {
@@ -55,4 +62,8 @@ export default class Chat extends Component {
             </div>
         );
     }
+};
+
+Chat.propTypes = {
+    onLogout: React.PropTypes.func.isRequired,
 };

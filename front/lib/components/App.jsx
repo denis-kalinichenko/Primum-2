@@ -11,23 +11,38 @@ export default class App extends Component {
     constructor() {
         super();
         this.state = {
-            token: localStorage.getItem('token') || "",
+            logged: false,
         };
         autobind(this);
     }
 
+    componentDidMount() {
+        if (localStorage.getItem('token')) {
+            this.setState({
+                logged: true,
+            });
+        }
+    }
+
     handleOnLogin(token) {
+        localStorage.setItem('token', token);
         this.setState({
-            token: token,
+            logged: true,
         });
-        localStorage.setItem('token', this.state.token);
+    }
+
+    handleOnLogout() {
+        localStorage.removeItem("token");
+        this.setState({
+            logged: false,
+        });
     }
 
     render() {
         return (
             <Router>
                 <div>
-                    {this.state.token ? (
+                    {this.state.logged ? (
                         <Redirect to="/chat"/>
                     ) : ""}
 
@@ -36,7 +51,9 @@ export default class App extends Component {
                         <Login onLogin={this.handleOnLogin} />
                     )} />
                     <Route path="/register" component={Register} />
-                    <Route path="/chat" component={Chat} />
+                    <Route path="/chat" render={() => (
+                        <Chat onLogout={this.handleOnLogout} />
+                    )} />
                 </div>
             </Router>
         );
