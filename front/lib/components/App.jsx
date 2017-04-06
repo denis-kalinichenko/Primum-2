@@ -47,10 +47,10 @@ export default class App extends Component {
                     ) : ""}
 
                     <Route exact path="/" component={Home} />
-                    <Route path="/login" render={() => (
+                    <Route exact path="/login" render={() => (
                         <Login onLogin={this.handleOnLogin} />
                     )} />
-                    <Route path="/register" component={Register} />
+                    <Route exact path="/register" component={Register} />
                     <Route path="/chat" render={() => (
                         <Chat onLogout={this.handleOnLogout} />
                     )} />

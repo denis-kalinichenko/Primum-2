@@ -2,12 +2,16 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import autobind from "react-autobind";
 
+import RoomForm from "./RoomForm.jsx";
+
 export default class Chat extends Component {
     constructor() {
         super();
         this.state = {
             users: [],
             authError: false,
+            layout: null,
+            roomId: null,
         };
         autobind(this);
     }
@@ -46,6 +50,17 @@ export default class Chat extends Component {
         });
     }
 
+    changeLayout(name) {
+        this.setState({ layout: name, });
+    }
+
+    handleRoomCreate(room) {
+        this.setState({
+            layout: "room",
+            roomId: room._id,
+        });
+    }
+
     render() {
         return (
             <div>
@@ -53,12 +68,16 @@ export default class Chat extends Component {
                     <Redirect to="/" />
                 ) : ""}
                 <button type="button" onClick={this.logout}>Logout</button>
-                <div>Chat</div>
-                {
-                    this.state.users.map(function(user) {
-                        return <div key={user._id}>{user.username}</div>
-                    })
-                }
+                <h1>Chat</h1>
+
+                {this.state.layout === null ? (
+                    <div>
+                        <button onClick={() => this.changeLayout("roomForm") }>Create new room</button>
+                        <h3>Welcome!</h3>
+                    </div>
+                ) : ""}
+
+                {this.state.layout === "roomForm" ? ( <RoomForm users={this.state.users} onCreate={this.handleRoomCreate} /> ) : ""}
             </div>
         );
     }
