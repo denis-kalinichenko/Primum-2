@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import autobind from "react-autobind";
+import {Event} from 'react-socket-io';
 
 export default class Room extends Component {
-    constructor(props) {
-        super(props);
+    constructor(props, context) {
+        super(props, context);
         autobind(this);
 
         this.state = {
@@ -12,11 +13,14 @@ export default class Room extends Component {
                 name: null,
                 members: [],
             },
+            messages: [],
+            message: "",
         };
     }
 
     componentDidMount() {
         this.fetchRoom();
+        this.context.socket.emit("roomOpen", this.props.id);
     }
 
     fetchRoom() {
@@ -57,14 +61,26 @@ export default class Room extends Component {
         });
     }
 
+    handleMessageChange(event) {
+        this.setState({
+            message: event.target.value,
+        });
+    }
+
     handleSubmit(event) {
         event.preventDefault();
+        this.setState({
+            messages: this.state.messages.concat([this.state.message]),
+            message: "",
+        });
     }
 
     render() {
         return (
             <div>
-                <div><button type="button" onClick={this.props.onBack}>Back</button></div>
+                <div>
+                    <button type="button" onClick={this.props.onBack}>Back</button>
+                </div>
                 <h3>{this.state.room.name || 'Room #' + this.state.room._id}</h3>
                 <button type="button" onClick={this.leaveRoom}>Leave</button>
                 <p>
@@ -76,6 +92,14 @@ export default class Room extends Component {
                     }
                 </p>
                 <div>
+                    <h4>Messages:</h4>
+                    {
+                        this.state.messages.map((message, index) => {
+                            return <div key={index}>{message}</div>
+                        })
+                    }
+                </div>
+                <div>
                     <form onSubmit={this.handleSubmit}>
                         <textarea
                             placeholder="Message..."
@@ -83,8 +107,11 @@ export default class Room extends Component {
                             id="message"
                             ref="message"
                             cols="30"
-                            rows="10">
-                        </textarea>
+                            rows="10"
+                            onChange={this.handleMessageChange}
+                            value={this.state.message}
+                            required
+                        />
                         <br/>
                         <button type="submit">Send message</button>
                     </form>
@@ -98,4 +125,8 @@ Room.propTypes = {
     id: React.PropTypes.string.isRequired,
     onLogout: React.PropTypes.func.isRequired,
     onBack: React.PropTypes.func.isRequired,
+};
+
+Room.contextTypes = {
+    socket: React.PropTypes.object.isRequired
 };

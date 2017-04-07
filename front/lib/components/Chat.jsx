@@ -1,13 +1,17 @@
-import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+import React, {Component} from 'react';
+import {Redirect} from 'react-router-dom';
 import autobind from "react-autobind";
+import {Socket} from 'react-socket-io';
 
 import RoomForm from "./RoomForm.jsx";
 import Room from "./Room.jsx";
 
+const uri = 'http://localhost:3000/';
+const options = { transports: ['websocket'] };
+
 export default class Chat extends Component {
-    constructor() {
-        super();
+    constructor(props, context) {
+        super(props, context);
         this.state = {
             rooms: [],
             authError: false,
@@ -49,7 +53,7 @@ export default class Chat extends Component {
     }
 
     changeLayout(name) {
-        this.setState({ layout: name, });
+        this.setState({layout: name});
         this.getRooms();
     }
 
@@ -66,49 +70,51 @@ export default class Chat extends Component {
 
     render() {
         return (
-            <div>
-                {this.state.authError ? (
-                    <Redirect to="/" />
-                ) : ""}
-                <button type="button" onClick={this.logout}>Logout</button>
-                <h1>Chat</h1>
+            <Socket uri={uri} options={options}>
+                <div>
+                    {this.state.authError ? (
+                        <Redirect to="/"/>
+                    ) : ""}
+                    <button type="button" onClick={this.logout}>Logout</button>
+                    <h1>Chat</h1>
 
-                {this.state.layout === null ? (
-                    <div>
-                        <button onClick={() => this.changeLayout("roomForm") }>Create new room</button>
-                        <h3>Welcome!</h3>
-                        <p>Choose room:</p>
-                        {
-                            this.state.rooms.map(room => {
-                                return <div key={room._id}>
-                                    <button
-                                        type="button"
-                                        onClick={() => this.openRoom(room._id)}
-                                    >
-                                        {room.name ? room.name : `Room #${room._id}`}
-                                    </button>
-                                </div>
-                            })
-                        }
-                    </div>
-                ) : ""}
+                    {this.state.layout === null ? (
+                        <div>
+                            <button onClick={() => this.changeLayout("roomForm") }>Create new room</button>
+                            <h3>Welcome!</h3>
+                            <p>Choose room:</p>
+                            {
+                                this.state.rooms.map(room => {
+                                    return <div key={room._id}>
+                                        <button
+                                            type="button"
+                                            onClick={() => this.openRoom(room._id)}
+                                        >
+                                            {room.name ? room.name : `Room #${room._id}`}
+                                        </button>
+                                    </div>
+                                })
+                            }
+                        </div>
+                    ) : ""}
 
-                {this.state.layout === "roomForm" ? (
-                    <RoomForm
-                        onCreate={this.handleRoomCreate}
-                        onCancel={() => this.changeLayout(null)}
-                        onLogout={this.logout}
-                    />
-                ) : ""}
+                    {this.state.layout === "roomForm" ? (
+                        <RoomForm
+                            onCreate={this.handleRoomCreate}
+                            onCancel={() => this.changeLayout(null)}
+                            onLogout={this.logout}
+                        />
+                    ) : ""}
 
-                {this.state.layout === "room" ? (
-                    <Room
-                        id={this.state.roomId}
-                        onLogout={this.logout}
-                        onBack={() => this.changeLayout(null)}
-                    />
-                ) : ""}
-            </div>
+                    {this.state.layout === "room" ? (
+                        <Room
+                            id={this.state.roomId}
+                            onLogout={this.logout}
+                            onBack={() => this.changeLayout(null)}
+                        />
+                    ) : ""}
+                </div>
+            </Socket>
         );
     }
 };
