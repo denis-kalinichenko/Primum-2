@@ -34,18 +34,8 @@ export default class RoomForm extends Component {
                     users: json,
                 });
             } else {
-                this.logout();
-                this.setState({
-                    authError: true,
-                });
+                this.props.onLogout();
             }
-        });
-    }
-
-    logout() {
-        this.props.onLogout();
-        this.setState({
-            authError: true,
         });
     }
 
@@ -130,4 +120,5 @@ export default class RoomForm extends Component {
 RoomForm.propTypes = {
     onCreate: React.PropTypes.func.isRequired,
     onCancel: React.PropTypes.func.isRequired,
+    onLogout: React.PropTypes.func.isRequired,
 };

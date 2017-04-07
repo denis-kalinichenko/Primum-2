@@ -3,6 +3,7 @@ import { Redirect } from 'react-router-dom';
 import autobind from "react-autobind";
 
 import RoomForm from "./RoomForm.jsx";
+import Room from "./Room.jsx";
 
 export default class Chat extends Component {
     constructor() {
@@ -49,13 +50,18 @@ export default class Chat extends Component {
 
     changeLayout(name) {
         this.setState({ layout: name, });
+        this.getRooms();
     }
 
     handleRoomCreate(room) {
+        this.changeLayout(null);
+    }
+
+    openRoom(roomId) {
         this.setState({
-            layout: null,
+            layout: "room",
+            roomId: roomId,
         });
-        this.getRooms();
     }
 
     render() {
@@ -71,9 +77,17 @@ export default class Chat extends Component {
                     <div>
                         <button onClick={() => this.changeLayout("roomForm") }>Create new room</button>
                         <h3>Welcome!</h3>
+                        <p>Choose room:</p>
                         {
-                            this.state.rooms.map(function (room) {
-                                return <div key={room._id}>{room.name ? room.name : `Room #${room._id}`}</div>
+                            this.state.rooms.map(room => {
+                                return <div key={room._id}>
+                                    <button
+                                        type="button"
+                                        onClick={() => this.openRoom(room._id)}
+                                    >
+                                        {room.name ? room.name : `Room #${room._id}`}
+                                    </button>
+                                </div>
                             })
                         }
                     </div>
@@ -84,6 +98,14 @@ export default class Chat extends Component {
                         onCreate={this.handleRoomCreate}
                         onCancel={() => this.changeLayout(null)}
                         onLogout={this.logout}
+                    />
+                ) : ""}
+
+                {this.state.layout === "room" ? (
+                    <Room
+                        id={this.state.roomId}
+                        onLogout={this.logout}
+                        onBack={() => this.changeLayout(null)}
                     />
                 ) : ""}
             </div>
