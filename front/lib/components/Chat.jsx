@@ -8,7 +8,7 @@ export default class Chat extends Component {
     constructor() {
         super();
         this.state = {
-            users: [],
+            rooms: [],
             authError: false,
             layout: null,
             roomId: null,
@@ -17,11 +17,11 @@ export default class Chat extends Component {
     }
 
     componentDidMount() {
-        this.getUsers();
+        this.getRooms();
     }
 
-    getUsers() {
-        fetch('http://127.0.0.1:3000/user/', {
+    getRooms() {
+        fetch('http://127.0.0.1:3000/room/', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -32,13 +32,10 @@ export default class Chat extends Component {
         }).then(json => {
             if (json.status !== "error") {
                 this.setState({
-                    users: json,
+                    rooms: json,
                 });
             } else {
                 this.logout();
-                this.setState({
-                    authError: true,
-                });
             }
         });
     }
@@ -56,9 +53,9 @@ export default class Chat extends Component {
 
     handleRoomCreate(room) {
         this.setState({
-            layout: "room",
-            roomId: room._id,
+            layout: null,
         });
+        this.getRooms();
     }
 
     render() {
@@ -74,10 +71,21 @@ export default class Chat extends Component {
                     <div>
                         <button onClick={() => this.changeLayout("roomForm") }>Create new room</button>
                         <h3>Welcome!</h3>
+                        {
+                            this.state.rooms.map(function (room) {
+                                return <div key={room._id}>{room.name ? room.name : `Room #${room._id}`}</div>
+                            })
+                        }
                     </div>
                 ) : ""}
 
-                {this.state.layout === "roomForm" ? ( <RoomForm users={this.state.users} onCreate={this.handleRoomCreate} /> ) : ""}
+                {this.state.layout === "roomForm" ? (
+                    <RoomForm
+                        onCreate={this.handleRoomCreate}
+                        onCancel={() => this.changeLayout(null)}
+                        onLogout={this.logout}
+                    />
+                ) : ""}
             </div>
         );
     }

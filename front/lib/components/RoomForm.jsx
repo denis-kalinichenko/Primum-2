@@ -8,10 +8,45 @@ export default class RoomForm extends Component {
         autobind(this);
 
         this.state = {
+            users: [],
             name: "",
             selectedUsers: [],
             room: null,
         };
+    }
+
+    componentDidMount() {
+        this.getUsers();
+    }
+
+    getUsers() {
+        fetch('http://127.0.0.1:3000/user/', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+        }).then(response => {
+            return response.json();
+        }).then(json => {
+            if (json.status !== "error") {
+                this.setState({
+                    users: json,
+                });
+            } else {
+                this.logout();
+                this.setState({
+                    authError: true,
+                });
+            }
+        });
+    }
+
+    logout() {
+        this.props.onLogout();
+        this.setState({
+            authError: true,
+        });
     }
 
     handleNameChange(event) {
@@ -79,19 +114,20 @@ export default class RoomForm extends Component {
                     onChange={this.handleSelectedUsersChange}
                 >
                     {
-                        this.props.users.map(function (user) {
+                        this.state.users.map(function (user) {
                             return <option key={user._id} value={user._id}>{user.username}</option>
                         })
                     }
                 </select>
                 <br/>
                 <button type="submit">Create</button>
+                <button type="button" onClick={this.props.onCancel}>Cancel</button>
             </form>
         );
     }
 }
 
 RoomForm.propTypes = {
-    users: React.PropTypes.array.isRequired,
     onCreate: React.PropTypes.func.isRequired,
+    onCancel: React.PropTypes.func.isRequired,
 };
